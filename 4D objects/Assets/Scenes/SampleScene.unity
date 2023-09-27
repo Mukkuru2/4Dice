@@ -302,13 +302,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: -3.4, y: 0, z: -3.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
 --- !u!1 &1847742814
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,6 +322,7 @@ GameObject:
   - component: {fileID: 1847742816}
   - component: {fileID: 1847742819}
   - component: {fileID: 1847742820}
+  - component: {fileID: 1847742821}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -349,7 +350,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a33808222ac955641a6e063a1a53dafe, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -407,7 +408,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Mesh: {fileID: 1847742820}
-  Mesh3D: {fileID: 0}
+  Mesh3D: {fileID: 1847742817}
+  WFRenderer: {fileID: 1847742821}
+  projectionMode: 0
   Position: {x: 0, y: 0, z: 0, w: 0}
   Rotation:
     XY: 0
@@ -429,8 +432,102 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcaedc438b7282940ab921f1e5a627ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Vertices: []
-  Edges: []
+  Vertices:
+  - {x: -1, y: -1, z: -1, w: -1}
+  - {x: -1, y: -1, z: -1, w: 1}
+  - {x: -1, y: -1, z: 1, w: -1}
+  - {x: -1, y: -1, z: 1, w: 1}
+  - {x: -1, y: 1, z: -1, w: -1}
+  - {x: -1, y: 1, z: -1, w: 1}
+  - {x: -1, y: 1, z: 1, w: -1}
+  - {x: -1, y: 1, z: 1, w: 1}
+  - {x: 1, y: -1, z: -1, w: -1}
+  - {x: 1, y: -1, z: -1, w: 1}
+  - {x: 1, y: -1, z: 1, w: -1}
+  - {x: 1, y: -1, z: 1, w: 1}
+  - {x: 1, y: 1, z: -1, w: -1}
+  - {x: 1, y: 1, z: -1, w: 1}
+  - {x: 1, y: 1, z: 1, w: -1}
+  - {x: 1, y: 1, z: 1, w: 1}
+  Edges:
+  - Index0: 0
+    Index1: 1
+  - Index0: 0
+    Index1: 2
+  - Index0: 0
+    Index1: 4
+  - Index0: 1
+    Index1: 3
+  - Index0: 1
+    Index1: 5
+  - Index0: 2
+    Index1: 3
+  - Index0: 2
+    Index1: 6
+  - Index0: 3
+    Index1: 7
+  - Index0: 4
+    Index1: 5
+  - Index0: 4
+    Index1: 6
+  - Index0: 5
+    Index1: 7
+  - Index0: 6
+    Index1: 7
+  - Index0: 8
+    Index1: 9
+  - Index0: 8
+    Index1: 10
+  - Index0: 8
+    Index1: 12
+  - Index0: 9
+    Index1: 11
+  - Index0: 9
+    Index1: 13
+  - Index0: 10
+    Index1: 11
+  - Index0: 10
+    Index1: 14
+  - Index0: 11
+    Index1: 15
+  - Index0: 12
+    Index1: 13
+  - Index0: 12
+    Index1: 14
+  - Index0: 13
+    Index1: 15
+  - Index0: 14
+    Index1: 15
+  - Index0: 0
+    Index1: 8
+  - Index0: 1
+    Index1: 9
+  - Index0: 2
+    Index1: 10
+  - Index0: 3
+    Index1: 11
+  - Index0: 4
+    Index1: 12
+  - Index0: 5
+    Index1: 13
+  - Index0: 6
+    Index1: 14
+  - Index0: 7
+    Index1: 15
+  Polygons: []
+--- !u!114 &1847742821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847742814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55778fb17555ac74a9ee5fa4bdf309f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CylinderPrefab: {fileID: 8094691074274408058, guid: 8dcc9c871c9b4424a9f754fa63eee055, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
