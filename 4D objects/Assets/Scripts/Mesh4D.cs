@@ -7,7 +7,6 @@ public class Mesh4D : MonoBehaviour
 {
     public Vector4[] Vertices;
     public Edge[] Edges;
-    public Polygon[] Polygons;
 
     [Serializable]
     public struct Edge
@@ -22,22 +21,10 @@ public class Mesh4D : MonoBehaviour
         }
     }
 
-    [Serializable]
-    public struct Polygon
-    {
-        public Vector4[] Vertices;
-
-        public Polygon(Vector4[] vertices)
-        {
-            Vertices = vertices;
-        }
-    }
-
     public void Initialise()
     {
         Vertices = GetHypercubeVertices();
         Edges = GetHypercubeEdges();
-        Polygons = GetPolygons();
     }
 
     // Get the vertices of a hypercube
@@ -70,7 +57,7 @@ public class Mesh4D : MonoBehaviour
     private Edge[] GetHypercubeEdges()
     {
         Edge[] edges = new Edge[32];
-        
+
         // Edges of the first 3d cube, with the w set to 1
         edges[0] = new Edge(0, 1);
         edges[1] = new Edge(0, 2);
@@ -97,7 +84,7 @@ public class Mesh4D : MonoBehaviour
         edges[21] = new Edge(12, 14);
         edges[22] = new Edge(13, 15);
         edges[23] = new Edge(14, 15);
-        
+
         // Connecting edges
         edges[24] = new Edge(0, 8);
         edges[25] = new Edge(1, 9);
@@ -107,43 +94,10 @@ public class Mesh4D : MonoBehaviour
         edges[29] = new Edge(5, 13);
         edges[30] = new Edge(6, 14);
         edges[31] = new Edge(7, 15);
-        
-        
-        
+
+
+
         return edges;
     }
 
-    // Get the polygons of a hypercube
-    private Polygon[] GetPolygons()
-    {
-        Polygon[] polygons = new Polygon[16];
-
-        // Squares of cube with w equal to 1
-        polygons[0] = new Polygon(new[] {Vertices[0], Vertices[1], Vertices[3], Vertices[2]});
-        polygons[1] = new Polygon(new[] {Vertices[0], Vertices[1], Vertices[5], Vertices[4]});
-        polygons[2] = new Polygon(new[] {Vertices[0], Vertices[2], Vertices[6], Vertices[4]});
-        polygons[3] = new Polygon(new[] {Vertices[1], Vertices[3], Vertices[7], Vertices[5]});
-        polygons[4] = new Polygon(new[] {Vertices[2], Vertices[3], Vertices[7], Vertices[6]});
-        polygons[5] = new Polygon(new[] {Vertices[4], Vertices[5], Vertices[7], Vertices[6]});
-        
-        // Squares of cube with w equal to -1
-        polygons[6] = new Polygon(new[] {Vertices[8], Vertices[9], Vertices[11], Vertices[10]});
-        polygons[7] = new Polygon(new[] {Vertices[8], Vertices[9], Vertices[13], Vertices[12]});
-        polygons[8] = new Polygon(new[] {Vertices[8], Vertices[10], Vertices[14], Vertices[12]});
-        polygons[9] = new Polygon(new[] {Vertices[9], Vertices[11], Vertices[15], Vertices[13]});
-        polygons[10] = new Polygon(new[] {Vertices[10], Vertices[11], Vertices[15], Vertices[14]});
-        polygons[11] = new Polygon(new[] {Vertices[12], Vertices[13], Vertices[15], Vertices[14]});
-        
-        // Connecting squares
-        polygons[12] = new Polygon(new[] {Vertices[0], Vertices[8], Vertices[10], Vertices[2]});
-        polygons[13] = new Polygon(new[] {Vertices[1], Vertices[9], Vertices[11], Vertices[3]});
-        polygons[14] = new Polygon(new[] {Vertices[4], Vertices[12], Vertices[14], Vertices[6]});
-        polygons[15] = new Polygon(new[] {Vertices[5], Vertices[13], Vertices[15], Vertices[7]});
-        
-
-
-        return polygons;
-    }
-    
-    
 }
