@@ -53,8 +53,6 @@ public class MeshWireframeRenderer4D : MonoBehaviour
             end -= pos;
             end *=  Mathf.Pow(factor, vertices[edge.Index1].w);
             end += pos;
-
-            print(start + ", " + end);
             
             
             // Check if a cylinder exists in the EdgeGameobjects array. If not, create one

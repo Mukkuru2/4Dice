@@ -1,12 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using MIConvexHull;
 using UnityEngine;
+using Vector4 = UnityEngine.Vector4;
 
 public class Mesh4D : MonoBehaviour
 {
     public Vector4[] Vertices;
     public Edge[] Edges;
+
 
     [Serializable]
     public struct Edge
@@ -24,7 +29,7 @@ public class Mesh4D : MonoBehaviour
     public void Initialise()
     {
         Vertices = GetHypercubeVertices();
-        Edges = GetHypercubeEdges();
+        Edges = GetHypercubeEdges(Vertices);
     }
 
     // Get the vertices of a hypercube
@@ -49,55 +54,99 @@ public class Mesh4D : MonoBehaviour
         vertices[13] = new Vector4(1, -1, 1, -1);
         vertices[14] = new Vector4(1, 1, -1, -1);
         vertices[15] = new Vector4(1, 1, 1, -1);
-        
+
         return vertices;
     }
 
     // Get the edges of a hypercube
-    private Edge[] GetHypercubeEdges()
+    private Edge[] GetHypercubeEdges(Vector4[] vertices)
     {
-        Edge[] edges = new Edge[32];
+        // Vertex <- Vector4
+        DefaultVertex[] verts = new DefaultVertex[vertices.Length];
+        for (int i = 0; i < verts.Length; i++)
+        {
+            verts[i] = new DefaultVertex();
+            verts[i].Position = new double[] { vertices[i].x, vertices[i].y, vertices[i].z, vertices[i].w };
+        }
 
-        // Edges of the first 3d cube, with the w set to 1
-        edges[0] = new Edge(0, 1);
-        edges[1] = new Edge(0, 2);
-        edges[2] = new Edge(0, 4);
-        edges[3] = new Edge(1, 3);
-        edges[4] = new Edge(1, 5);
-        edges[5] = new Edge(2, 3);
-        edges[6] = new Edge(2, 6);
-        edges[7] = new Edge(3, 7);
-        edges[8] = new Edge(4, 5);
-        edges[9] = new Edge(4, 6);
-        edges[10] = new Edge(5, 7);
-        edges[11] = new Edge(6, 7);
-        // Edges of the second 3d cube, with the w set to -1
-        edges[12] = new Edge(8, 9);
-        edges[13] = new Edge(8, 10);
-        edges[14] = new Edge(8, 12);
-        edges[15] = new Edge(9, 11);
-        edges[16] = new Edge(9, 13);
-        edges[17] = new Edge(10, 11);
-        edges[18] = new Edge(10, 14);
-        edges[19] = new Edge(11, 15);
-        edges[20] = new Edge(12, 13);
-        edges[21] = new Edge(12, 14);
-        edges[22] = new Edge(13, 15);
-        edges[23] = new Edge(14, 15);
-
-        // Connecting edges
-        edges[24] = new Edge(0, 8);
-        edges[25] = new Edge(1, 9);
-        edges[26] = new Edge(2, 10);
-        edges[27] = new Edge(3, 11);
-        edges[28] = new Edge(4, 12);
-        edges[29] = new Edge(5, 13);
-        edges[30] = new Edge(6, 14);
-        edges[31] = new Edge(7, 15);
+        // Creates the convex null
+        var result = ConvexHull.Create(verts).Result;
 
 
+        // Set the edges to the vertices
+        List<Edge> edges = new List<Edge>();
+        List<Vector4> verts4 = new List<Vector4>();
+        
+        foreach (var face in result.Faces)
+        {
+            Vector4[] faceVerts = new Vector4[4];
+            int[] faceIndices = new int[4];
+            // Get index of each vertex in the face
+            for (int i = 0; i < 4; i++)
+            {
+                faceVerts[i] = new Vector4((float)face.Vertices[i].Position[0], (float)face.Vertices[i].Position[1],
+                    (float)face.Vertices[i].Position[2], (float)face.Vertices[i].Position[3]);
+                // Get the index of vert if it is already in the list, else add it to the list
+                faceIndices[i] = verts4.IndexOf(faceVerts[i]);
+                if (faceIndices[i] == -1)
+                {
+                    verts4.Add(faceVerts[i]);
+                    faceIndices[i] = verts4.Count - 1;
+                }
+            }
+        }
+        
+        float smallest = GetSmallestDistance(verts4.ToArray());
 
-        return edges;
+        // Loop through all the vertices
+        foreach (Vector4 vertex in verts4)
+        {
+            foreach (Vector4 vertex2 in verts4)
+            {
+                // If the vertices are the same, skip
+                if (vertex == vertex2)
+                {
+                    continue;
+                }
+                
+                // If the distance is 2, add the edge
+                if (Vector4.Distance(vertex, vertex2) == smallest)
+                {
+                    edges.Add(new Edge(verts4.IndexOf(vertex), verts4.IndexOf(vertex2)));
+                }
+            }
+        }
+
+        print(edges.Count);
+        
+
+        Vertices = verts4.ToArray();
+        return edges.ToArray();
     }
 
+    private float GetSmallestDistance(Vector4[] verts)
+    {
+        // Get the smallest distance between two vertices
+        float smallest = float.MaxValue;
+        foreach (Vector4 vertex in verts)
+        {
+            foreach (Vector4 vertex2 in verts)
+            {
+                // If the vertices are the same, skip
+                if (vertex == vertex2)
+                {
+                    continue;
+                }
+                
+                // If the distance is smaller than the smallest, set the smallest to the distance
+                float distance = Vector4.Distance(vertex, vertex2);
+                if (distance < smallest)
+                {
+                    smallest = distance;
+                }
+            }
+        }
+
+        return smallest;
+    }
 }
