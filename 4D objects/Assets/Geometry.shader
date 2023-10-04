@@ -75,26 +75,29 @@
      
                 float3 blur(float2 uv, float radius)
                 {
-                    float2x2 m = float2x2(-0.736717, 0.6762, -0.6762, -0.736717);
+                    float n = 0.005;
+                    float2x2 m = float2x2(-0.736717, 0.6762, -0.6262, -0.766717);
+                    // float2x2 m = float2x2(0.736717,0.736717,-0.736717,0.736717);
                     float3 total = float3(0.,0.,0.);
-                    float2 texel = float2(0.002*_BackgroundTexture_TexelSize.z/_BackgroundTexture_TexelSize.w, 0.002);
+                    float2 texel = float2(n *_BackgroundTexture_TexelSize.z/_BackgroundTexture_TexelSize.w, n);
                     float2 angle = float2(0.0,radius);
+                    
                     radius = 1.0;
-                    for (int j=0; j<64; j++)
+                    for (int j=0; j<16; j++)
                     {
                         radius += rcp(radius);
                         angle = mul(angle, m);
                         float3 color = tex2D(_BackgroundTexture, uv+texel*(radius-1.0)*angle).rgb;
                         total += color;
                     }
-                    return total/64.0;
+                    return total/16.0;
                 }
                
                 float4 PSMain(Data PS) : SV_Target
                 {
-                    float3 color = blur(PS.vertex.xy/_ScreenParams.xy, 0.1);
-                    float3 value = smoothstep(0.,50., abs(color)/fwidth(color));
-                    return float4(min(min(value.x, min(value.y, value.z)).xxx , abs(color)), 1.0) ;
+                    float3 color = blur(PS.vertex.xy/_ScreenParams.xy, 0.03);
+                    float3 value = smoothstep(0.,10., abs(color)/fwidth(color));
+                    return float4(min(min(value.x, min(value.y, value.z)).xxx , abs(color)), 1.0);
                 }
                 ENDCG
             }

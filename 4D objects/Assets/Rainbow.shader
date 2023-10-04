@@ -22,8 +22,6 @@ Shader "Unlit/WorldSpaceNormals"
             {
                 v2f o;
                 o.pos = UnityObjectToClipPos(vertex);
-                // UnityCG.cginc file contains function to transform
-                // normal from object to world space, use that
                 o.worldNormal = UnityObjectToWorldNormal(normal);
                 return o;
             }

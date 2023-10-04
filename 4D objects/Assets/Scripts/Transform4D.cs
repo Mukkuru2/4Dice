@@ -1,23 +1,62 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using MIConvexHull;
-using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
+using static MeshWireframeRenderer4D;
 
 public class Transform4D : MonoBehaviour
 {
-    [Header("Mesh4D")] public Mesh4D Mesh;
-    public MeshFilter Mesh3D;
-    public MeshWireframeRenderer4D WFRenderer;
-    public ProjectionMode projectionMode = ProjectionMode.CrossSection;
-    private Vector4[] Vertices;
-    [Header("Transform")] public Vector4 Position;
+    [Header("Mesh4D")] 
+    public Mesh4D Mesh;
+
+    public ProjectionModes projectionMode;
+    public ProjectionModes ProjectionMode {
+        get { return projectionMode; }
+        set {
+            projectionMode = value;
+            // Disable the other renderer
+            switch (value)
+            {
+                case ProjectionModes.CrossSection:
+                    if (WFRenderer != null)
+                        WFRenderer.enabled = false;
+                    if (Renderer != null)
+                        Renderer.enabled = true;
+                    break;
+                case ProjectionModes.Orthographic:
+                    if (WFRenderer != null)
+                        WFRenderer.enabled = true;
+                    if (Renderer != null)
+                        Renderer.enabled = false;
+                    break;
+            }
+        }
+    }
+    
+    private MeshRenderer4D Renderer;
+    private MeshWireframeRenderer4D WFRenderer;
+    private Vector4[] vertices;
+    public Vector4[] Vertices => vertices;
+
+    [Header("Transform")] 
+    private Vector4 position;
+
+    public float w;
+    
+    public Vector4 Position {
+        get { return position; }
+        set {
+            position = value;
+            transform.position = new Vector3(value.x, value.y, value.z);
+        }
+    }
     public Euler4 Rotation;
     public Vector4 Scale = new Vector4(1, 1, 1, 1);
     private Matrix4x4 RotationMatrix;
     private Matrix4x4 RotationMatrixInverse;
+    
+    
+    private float lastSwitchTime;
 
 
     [Serializable]
@@ -31,7 +70,7 @@ public class Transform4D : MonoBehaviour
         [Range(-180, +180)] public float ZW; // X Y
     }
 
-    public enum ProjectionMode
+    public enum ProjectionModes
     {
         CrossSection,
         Orthographic,
@@ -39,18 +78,22 @@ public class Transform4D : MonoBehaviour
 
     private void Start()
     {
+        // Get the renderers
+        Renderer = GetComponent<MeshRenderer4D>();
+        WFRenderer = GetComponent<MeshWireframeRenderer4D>();
+        
         Mesh.Initialise();
-        Vertices = new Vector4[Mesh.Vertices.Length];
+        vertices = new Vector4[Mesh.Vertices.Length];
+
+        ProjectionMode = projectionMode;
 
         UpdateRotationMatrix();
         UpdateVertices();
-
-        Mesh3D = GetComponent<MeshFilter>();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        Rotation.YW += 0.5f;
+        // Rotation.YW += 0.5f;
         if (Rotation.YW > 180)
             Rotation.YW = -180;
         
@@ -58,13 +101,25 @@ public class Transform4D : MonoBehaviour
         UpdateRotationMatrix();
         UpdateVertices();
 
-        switch (projectionMode)
+        switch (ProjectionMode)
         {
-            case ProjectionMode.CrossSection:
-                Mesh3D.mesh = Intersect();
+            case ProjectionModes.CrossSection:
+                // Raise error if no renderer
+                if (Renderer == null)
+                {
+                    Debug.LogError("No MeshRenderer4D component found on this object");
+                    return;
+                }
+                Renderer.Render();
                 break;
-            case ProjectionMode.Orthographic:
-                Mesh3D.mesh = WFRenderer.Render(Vertices, Mesh.Edges);
+            case ProjectionModes.Orthographic:
+                // Raise error if no renderer
+                if (WFRenderer == null)
+                {
+                    Debug.LogError("No MeshWireframeRenderer4D component found on this object");
+                    return;
+                }
+                WFRenderer.Render();
                 break;
         }
     }
@@ -73,7 +128,7 @@ public class Transform4D : MonoBehaviour
     {
         for (int i = 0; i < Mesh.Vertices.Length; i++)
         {
-            Vertices[i] = Transform(Mesh.Vertices[i]);
+            vertices[i] = Transform(Mesh.Vertices[i]);
         }
     }
 
@@ -90,7 +145,11 @@ public class Transform4D : MonoBehaviour
         v.z *= Scale.z;
         v.w *= Scale.w;
         // Translates
-        v += Position;
+
+        var position = transform.position;
+        this.position = new Vector4(position.x, position.y, position.z, w);
+        
+        v += this.position;
         return v;
     }
 
@@ -179,97 +238,5 @@ public class Transform4D : MonoBehaviour
         m.SetColumn(2, new Vector4(0, 0, c, s));
         m.SetColumn(3, new Vector4(0, 0, -s, c));
         return m;
-    }
-
-    private int Intersection(List<Vector3> list, Vector4 v0, Vector4 v1)
-    {
-        // Both points are 3D ==> the entire segment lies in the 3D space
-        if (v1.w == 0 && v0.w == 0)
-        {
-            list.Add(v0);
-            list.Add(v1);
-            return 2;
-        }
-
-        // Both w coordinates are equal
-        // If they are both 0 ==> the entire line is in the 3D space (already tested)
-        // If they are not 0 ==> the entire line is outside the 3D space
-        if (v1.w - v0.w == 0)
-            return 0;
-
-        // Time of intersection
-        float t = -v0.w / (v1.w - v0.w);
-
-        // No intersection
-        if (t < 0 || t > 1)
-            return 0;
-
-        // One intersection
-        Vector4 x = v0 + (v1 - v0) * t;
-        list.Add(x);
-        return 1;
-    }
-
-    public Mesh Intersect()
-    {
-        // Calculates the intersections
-        List<Vector3> vertices = new List<Vector3>();
-        foreach (Mesh4D.Edge edge in Mesh.Edges)
-            Intersection
-            (
-                vertices,
-                Vertices[edge.Index0],
-                Vertices[edge.Index1]
-            );
-
-        // Not enough intersection points!
-        if (vertices.Count < 3)
-            return null;
-
-        // Creates and returns the mesh
-        return CreateMesh(vertices);
-    }
-
-    Mesh CreateMesh(List<Vector3> unsortedVector3)
-    {
-        // Vertex <- Vector3
-        DefaultVertex[] vertices = new DefaultVertex[unsortedVector3.Count];
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] = new DefaultVertex();
-            vertices[i].Position = new double[] { unsortedVector3[i].x, unsortedVector3[i].y, unsortedVector3[i].z };
-        }
-
-        // Creates the convex null
-        var result = ConvexHull.Create(vertices).Result;
-
-        // Mesh 3D
-
-        Vector3[] vertices3 = new Vector3[result.Faces.Count() * 3];
-        int[] triangles = new int[result.Faces.Count() * 3];
-
-        int v = 0;
-        foreach (var face in result.Faces)
-        {
-            vertices3[v] = new Vector3((float)face.Vertices[0].Position[0], (float)face.Vertices[0].Position[1],
-                (float)face.Vertices[0].Position[2]);
-            triangles[v] = v++;
-
-            vertices3[v] = new Vector3((float)face.Vertices[1].Position[0], (float)face.Vertices[1].Position[1],
-                (float)face.Vertices[1].Position[2]);
-            triangles[v] = v++;
-
-            vertices3[v] = new Vector3((float)face.Vertices[2].Position[0], (float)face.Vertices[2].Position[1],
-                (float)face.Vertices[2].Position[2]);
-            triangles[v] = v++;
-        }
-
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices3;
-        mesh.triangles = triangles;
-
-        mesh.RecalculateNormals();
-
-        return mesh;
     }
 }
