@@ -57,8 +57,13 @@ public class MeshRenderer4D : MonoBehaviour
         // Creates the convex null
         var result = ConvexHull.Create(vertices).Result;
 
-        // Mesh 3D
-
+        // No convex hull found
+        if (result == null)
+        {
+            return Mesh3D.mesh;
+        }
+        
+        // Create Mesh3D
         Vector3[] vertices3 = new Vector3[result.Faces.Count() * 3];
         int[] triangles = new int[result.Faces.Count() * 3];
 
@@ -77,18 +82,10 @@ public class MeshRenderer4D : MonoBehaviour
                 (float)face.Vertices[2].Position[2]);
             triangles[v] = v++;
         }
-        
-        // Set the uv values
-        Vector2[] uvs = new Vector2[vertices3.Length];
-        for (int i = 0; i < uvs.Length; i++)
-        {
-            
-        }
 
         Mesh mesh = new Mesh();
         mesh.vertices = vertices3;
         mesh.triangles = triangles;
-        mesh.uv = uvs;
 
         mesh.RecalculateNormals();
 

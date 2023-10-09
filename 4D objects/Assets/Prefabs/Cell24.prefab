@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 639789660826536844}
   - component: {fileID: 1128813287576848416}
   m_Layer: 0
-  m_Name: Hypercube
+  m_Name: Cell24
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -204,7 +204,7 @@ MonoBehaviour:
     Index1: 14
   - Index0: 7
     Index1: 15
-  Shape: 1
+  Shape: 3
 --- !u!114 &639789660826536844
 MonoBehaviour:
   m_ObjectHideFlags: 0

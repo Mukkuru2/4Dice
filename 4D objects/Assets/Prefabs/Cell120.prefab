@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 639789660826536844}
   - component: {fileID: 1128813287576848416}
   m_Layer: 0
-  m_Name: Hypercube
+  m_Name: Cell120
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -139,72 +139,7 @@ MonoBehaviour:
   - {x: 1, y: 1, z: -1, w: 1}
   - {x: 1, y: 1, z: 1, w: -1}
   - {x: 1, y: 1, z: 1, w: 1}
-  Edges:
-  - Index0: 0
-    Index1: 1
-  - Index0: 0
-    Index1: 2
-  - Index0: 0
-    Index1: 4
-  - Index0: 1
-    Index1: 3
-  - Index0: 1
-    Index1: 5
-  - Index0: 2
-    Index1: 3
-  - Index0: 2
-    Index1: 6
-  - Index0: 3
-    Index1: 7
-  - Index0: 4
-    Index1: 5
-  - Index0: 4
-    Index1: 6
-  - Index0: 5
-    Index1: 7
-  - Index0: 6
-    Index1: 7
-  - Index0: 8
-    Index1: 9
-  - Index0: 8
-    Index1: 10
-  - Index0: 8
-    Index1: 12
-  - Index0: 9
-    Index1: 11
-  - Index0: 9
-    Index1: 13
-  - Index0: 10
-    Index1: 11
-  - Index0: 10
-    Index1: 14
-  - Index0: 11
-    Index1: 15
-  - Index0: 12
-    Index1: 13
-  - Index0: 12
-    Index1: 14
-  - Index0: 13
-    Index1: 15
-  - Index0: 14
-    Index1: 15
-  - Index0: 0
-    Index1: 8
-  - Index0: 1
-    Index1: 9
-  - Index0: 2
-    Index1: 10
-  - Index0: 3
-    Index1: 11
-  - Index0: 4
-    Index1: 12
-  - Index0: 5
-    Index1: 13
-  - Index0: 6
-    Index1: 14
-  - Index0: 7
-    Index1: 15
-  Shape: 1
+  Shape: 4
 --- !u!114 &639789660826536844
 MonoBehaviour:
   m_ObjectHideFlags: 0

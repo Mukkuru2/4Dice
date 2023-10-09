@@ -89,13 +89,20 @@ public class Transform4D : MonoBehaviour
 
         UpdateRotationMatrix();
         UpdateVertices();
+
+        Rotation.YZ = 45;
+        Rotation.ZW = 45;
     }
 
     private void FixedUpdate()
     {
-        // Rotation.YW += 0.5f;
+        Rotation.YW += 0.5f;
         if (Rotation.YW > 180)
             Rotation.YW = -180;
+        
+        Rotation.XW += 0.8f;
+        if (Rotation.XW > 180)
+            Rotation.XW = -180;
         
 
         UpdateRotationMatrix();
