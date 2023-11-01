@@ -8,17 +8,12 @@ public class MeshWireframeRenderer4D : MonoBehaviour
 {
     
     public GameObject CylinderPrefab;
+    public GameObject VertexPrefab;
     public MeshFilter Mesh3D;
     public Transform4D transform4D;
-
-    public GameObject[] EdgeGameobjects;
     
-    private void Start()
-    {
-        Mesh3D = GetComponent<MeshFilter>();
-        
-        transform4D = GetComponent<Transform4D>();
-    }
+    private GameObject[] EdgeGameobjects;
+    private GameObject[] VertexGameobjects;
 
     public void Render()
     {
@@ -29,34 +24,32 @@ public class MeshWireframeRenderer4D : MonoBehaviour
     public Mesh GetWireframeMesh(Vector4[] vertices, Mesh4D.Edge[] edges)
     {
         Mesh mesh = new Mesh();
-        float factor = 1.5f;
+        float factor = 2f;
         
         // Initialise the edge gameobjects array if it is null or not the same size as the edges array
-        if (EdgeGameobjects == null || EdgeGameobjects.Length != edges.Length)
+        if (EdgeGameobjects == null || VertexGameobjects == null || EdgeGameobjects.Length != edges.Length || VertexGameobjects.Length != vertices.Length)
         {
             EdgeGameobjects = new GameObject[edges.Length];
+            VertexGameobjects = new GameObject[vertices.Length];
+            
         }
         
         // Loop through edges and create a cylinder if it doesn't already exist
         // Each cylinder will have 2 vertices for each end of the cylinder
+        
         for (var edgeIndex = 0; edgeIndex < edges.Length; edgeIndex++)
         {
             var edge = edges[edgeIndex];
-            Vector3 pos = transform4D.Position;
-
             Vector3 start = new Vector3(vertices[edge.Index0].x, vertices[edge.Index0].y, vertices[edge.Index0].z);
-            start -= pos;
             start *=  Mathf.Pow(factor, vertices[edge.Index0].w);
-            start += pos * 2;
+            start += transform.position;
 
             Vector3 end = new Vector3(vertices[edge.Index1].x, vertices[edge.Index1].y, vertices[edge.Index1].z);
-            end -= pos;
             end *=  Mathf.Pow(factor, vertices[edge.Index1].w);
-            end += pos * 2;
-            
+            end += transform.position;
             
             // Check if a cylinder exists in the EdgeGameobjects array. If not, create one
-            if (EdgeGameobjects[edgeIndex] == null)
+            if (!EdgeGameobjects[edgeIndex])
             {
                 EdgeGameobjects[edgeIndex] = Instantiate(CylinderPrefab, transform);
             }
@@ -67,22 +60,49 @@ public class MeshWireframeRenderer4D : MonoBehaviour
             // Scale the cylinder between the two points
             float distance = Vector3.Distance(start, end);
             EdgeGameobjects[edgeIndex].transform.localScale = new Vector3(1, 1, distance);
+
+            var debug = EdgeGameobjects[edgeIndex].GetComponent<EdgeDebug>();
+            debug.index0 = edge.Index0;
+            debug.index1 = edge.Index1;
+            
+        }
+        
+        // Loop over the vertices
+        for (var vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++)
+        {
+            
+            var vertex = vertices[vertexIndex];
+            Vector3 position = new Vector3(vertex.x, vertex.y, vertex.z);
+            position *=  Mathf.Pow(factor, vertex.w);
+            position += transform.position;
+
+            if (!VertexGameobjects[vertexIndex])
+            {
+                VertexGameobjects[vertexIndex] = Instantiate(VertexPrefab, position, Quaternion.identity, transform);
+            }
+            else
+            {
+                VertexGameobjects[vertexIndex].transform.position = position;
+            }
+
+            VertexDebug debug = VertexGameobjects[vertexIndex].GetComponent<VertexDebug>();
+            debug.index = vertexIndex;
         }
 
         return mesh;
     }
     
     // When disabled, disable all children
-    private void OnDisable()
+    public void Disable()
     {
         foreach (Transform child in transform)
         {
-            if (child != transform) child.gameObject.SetActive(false);
+            child.gameObject.SetActive(false);
         }
     }
     
     // When enabled, enable all children
-    private void OnEnable()
+    public void Enable()
     {
         foreach (Transform child in transform)
         {

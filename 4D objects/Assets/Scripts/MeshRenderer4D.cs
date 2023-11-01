@@ -8,64 +8,74 @@ using MIConvexHull;
 
 public class MeshRenderer4D : MonoBehaviour
 {
-    
     public MeshFilter Mesh3D;
     public Transform4D transform4D;
-
-    private void Start()
-    {
-        Mesh3D = GetComponent<MeshFilter>();
-        
-        transform4D = GetComponent<Transform4D>();
-    }
-
+    
+    private Vector3[] vertices3 = Array.Empty<Vector3>();
+    private DefaultVertex[] calculationVertices = Array.Empty<DefaultVertex>();
+    private int[] triangles = Array.Empty<int>();
+    
     public void Render()
     {
-        Mesh mesh = Intersect(transform4D.Vertices, transform4D.Mesh.Edges);
-        Mesh3D.mesh = mesh;
+        Intersect(transform4D.Vertices, transform4D.Mesh.Edges);
     }
-    public Mesh Intersect(Vector4[] vertices, Mesh4D.Edge[] edges)
+    public void Intersect(Vector4[] vertices, Mesh4D.Edge[] edges)
     {
         // Calculates the intersections
-        List<Vector3> vert3d = new List<Vector3>();
+        List<Vector3> intersectionVertices = new List<Vector3>();
         foreach (Mesh4D.Edge edge in edges)
             Intersection
             (
-                vert3d,
+                intersectionVertices,
                 vertices[edge.Index0],
                 vertices[edge.Index1]
             );
 
         // Not enough intersection points!
-        if (vert3d.Count < 3)
-            return null;
+        if (intersectionVertices.Count < 3)
+        {
+            // Set all vertices in the vertices3 array to 0
+            for (int i = 0; i < vertices3.Length; i++)
+            {
+                vertices3[i] = Vector3.zero;
+            }
+            
+            return;
+        }
 
         // Creates and returns the mesh
-        return CreateMesh(vert3d);
+        CreateMesh(intersectionVertices.ToArray());
+        intersectionVertices.Clear();
     }
-    
-    Mesh CreateMesh(List<Vector3> unsortedVector3)
+
+    private void CreateMesh(Vector3[] v3)
     {
-        // Vertex <- Vector3
-        DefaultVertex[] vertices = new DefaultVertex[unsortedVector3.Count];
-        for (int i = 0; i < vertices.Length; i++)
+        if (calculationVertices.Length != v3.Length)
         {
-            vertices[i] = new DefaultVertex();
-            vertices[i].Position = new double[] { unsortedVector3[i].x, unsortedVector3[i].y, unsortedVector3[i].z };
+            calculationVertices = new DefaultVertex[v3.Length];
+        }
+
+        for (int i = 0; i < calculationVertices.Length; i++)
+        {
+            calculationVertices[i] = new DefaultVertex();
+            calculationVertices[i].Position = new double[] { v3[i].x, v3[i].y, v3[i].z };
         }
 
         // Creates the convex null
-        var result = ConvexHull.Create(vertices).Result;
+        var result = ConvexHull.Create(calculationVertices).Result;
 
         // No convex hull found
         if (result == null)
         {
-            return Mesh3D.mesh;
+            return;
         }
-        
-        // Create Mesh3D
-        Vector3[] vertices3 = new Vector3[result.Faces.Count() * 3];
-        int[] triangles = new int[result.Faces.Count() * 3];
+
+        // Check if more vertices and triangles are needed
+        if (vertices3.Length < result.Faces.Count() * 3)
+        {
+            vertices3 = new Vector3[result.Faces.Count() * 3];
+            triangles = new int[result.Faces.Count() * 3];
+        }
 
         int v = 0;
         foreach (var face in result.Faces)
@@ -82,16 +92,22 @@ public class MeshRenderer4D : MonoBehaviour
                 (float)face.Vertices[2].Position[2]);
             triangles[v] = v++;
         }
+        
+        // Fill rest of vector3 array with 0s
+        for (int i = v; i < vertices3.Length; i++)
+        {
+            vertices3[i] = Vector3.zero;
+            triangles[i] = 0;
+        }
 
-        Mesh mesh = new Mesh();
+        Mesh mesh = Mesh3D.mesh;
+        mesh.Clear();
         mesh.vertices = vertices3;
         mesh.triangles = triangles;
-
+        
         mesh.RecalculateNormals();
-
-        return mesh;
     }
-    
+
     private int Intersection(List<Vector3> list, Vector4 v0, Vector4 v1)
     {
         // Both points are 3D ==> the entire segment lies in the 3D space
@@ -120,9 +136,9 @@ public class MeshRenderer4D : MonoBehaviour
         list.Add(x);
         return 1;
     }
-    
+
     // On disable, disable the Mesh3D
-    private void OnDisable()
+    public void Disable()
     {
         Mesh3D.mesh = new Mesh();
     }

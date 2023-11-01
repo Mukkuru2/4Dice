@@ -116,6 +116,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8776322626987197350}
+  - component: {fileID: 2778651890212362559}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -133,9 +134,25 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 0.05, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2751573234279169373}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2778651890212362559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8094691074274408058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebee3bef9af86cb4292d8d1ab955ddd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  index0: 0
+  index1: 0
+  start: {x: 0, y: 0, z: 0, w: 0}
+  end: {x: 0, y: 0, z: 0, w: 0}
