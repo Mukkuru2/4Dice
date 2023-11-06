@@ -19,11 +19,9 @@ public static class Terrain4D
             {
                 for (int k = -1; k <= 1; k+=2)
                 {
+                    float y = 5 + 3 * noise.snoise(new float3((i + pos.x) / period + 1000, (j + pos.z) / period + 1000, k/period));
                     vertices.Add(new Vector4(i, 0, j, k));
-                    vertices.Add(new Vector4(i, 5 + 3 * noise.snoise(new float3((i+pos.x)/period + 1000, (j+pos.z)/period + 1000, k/period)), j, k));
-                    
-                    // if (k == -1)
-                        // if (pos.x == 0 && pos.z == 0) Debug.Log(noise.snoise(new float3((i+pos.x)/period, (j+pos.z)/period, k/period)) + " when x, z are" + i + ", " + j);
+                    vertices.Add(new Vector4(i, y, j, k));
                 }
             }
         }
@@ -56,9 +54,9 @@ public static class Terrain4D
                 bool bothYZero = vertex.y == 0 && vertex2.y == 0;
                 bool bothYNotZero = vertex.y != 0 && vertex2.y != 0;
                 bool sameXZW = vertex.x == vertex2.x && vertex.z == vertex2.z && vertex.w == vertex2.w;
-                bool gridDistCorrect = math.abs(math.distance(dist1, dist2) - gridDistance) < 0.0001f;   
+                bool oneGridUnitAwayFromEachother = math.abs(math.distance(dist1, dist2) - gridDistance) < 0.0001f;   
                 
-                if ((gridDistCorrect && (bothYZero || bothYNotZero)) || sameXZW)
+                if ((oneGridUnitAwayFromEachother && (bothYZero || bothYNotZero)) || sameXZW)
                 {
                     edges.Add(new Edge(i, j));
                 }
