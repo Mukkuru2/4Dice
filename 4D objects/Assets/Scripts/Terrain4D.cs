@@ -8,6 +8,7 @@ public static class Terrain4D
 {
 
     public static float period = 30f;
+    
     public static Vector4[] GetTerrainVertices(Vector3 pos)
     {
         
@@ -19,7 +20,7 @@ public static class Terrain4D
             {
                 for (int k = -1; k <= 1; k+=2)
                 {
-                    float y = 5 + 3 * noise.snoise(new float3((i + pos.x) / period + 1000, (j + pos.z) / period + 1000, k/period));
+                    float y = 8 + 2 * noise.snoise(new float3((i + pos.x) / period + 1000, (j + pos.z) / period + 1000, k));
                     vertices.Add(new Vector4(i, 0, j, k));
                     vertices.Add(new Vector4(i, y, j, k));
                 }

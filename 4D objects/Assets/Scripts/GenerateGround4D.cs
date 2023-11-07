@@ -14,6 +14,8 @@ public class GenerateGround4D : MonoBehaviour
 
     public int size = 1;
 
+    private bool reverse = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,6 +38,7 @@ public class GenerateGround4D : MonoBehaviour
                 chunkTransforms[n] = chunks[n].GetComponent<Transform4D>();
                 chunks[n].transform.position = new Vector3(x * 2, 0, z * 2);
                 chunks[n].GetComponent<Mesh4D>().Initialise();
+                SetBoxCollider(chunks[n].GetComponent<BoxCollider>());
                 n++;
             }
         }
@@ -44,6 +47,40 @@ public class GenerateGround4D : MonoBehaviour
     public void Update()
     {
         SetChildrenW(w);
+    }
+
+    public void FixedUpdate()
+    {
+        w += reverse ? -0.01f : 0.01f;
+
+        reverse = w switch
+        {
+            // When it reached 1, reverse. Same with -1
+            >= 1 => true,
+            <= -1 => false,
+            _ => reverse
+        };
+    }
+
+    private void SetBoxCollider(BoxCollider collider)
+    {
+        // Set box collider to average of the eight vertices where the y isnt 0
+        Vector4[] vertices = collider.GetComponent<Mesh4D>().Vertices;
+        Vector3 center = Vector3.zero;
+        int n = 0;
+        foreach (Vector4 vertex in vertices)
+        {
+            if (vertex.y != 0)
+            {
+                center += new Vector3(vertex.x, vertex.y, vertex.z);
+                n++;
+            }
+        }
+        
+        center /= n;
+        center.y /= 2;
+        collider.center = center;
+        collider.size = new Vector3(2, center.y * 2, 2);
     }
 
     private void SetChildrenW(float w)

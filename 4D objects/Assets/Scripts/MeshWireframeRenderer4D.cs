@@ -10,7 +10,7 @@ public class MeshWireframeRenderer4D : MonoBehaviour
     public GameObject VertexPrefab;
     public MeshFilter Mesh3D;
     public Transform4D transform4D;
-
+    
     private GameObject[] EdgeGameobjects;
     private GameObject[] VertexGameobjects;
 
@@ -26,7 +26,7 @@ public class MeshWireframeRenderer4D : MonoBehaviour
         public int zMin;
         public int zMax;
     }
-
+    
     public void Render()
     {
         GetWireframeMesh(transform4D.Vertices, transform4D.Mesh.Edges);
@@ -72,10 +72,6 @@ public class MeshWireframeRenderer4D : MonoBehaviour
             // Scale the cylinder between the two points
             float distance = Vector3.Distance(start, end);
             EdgeGameobjects[edgeIndex].transform.localScale = new Vector3(1, 1, distance);
-
-            var debug = EdgeGameobjects[edgeIndex].GetComponent<EdgeDebug>();
-            debug.index0 = edge.Index0;
-            debug.index1 = edge.Index1;
         }
 
         // Loop over the vertices
@@ -94,9 +90,6 @@ public class MeshWireframeRenderer4D : MonoBehaviour
             {
                 VertexGameobjects[vertexIndex].transform.position = position;
             }
-
-            VertexDebug debug = VertexGameobjects[vertexIndex].GetComponent<VertexDebug>();
-            debug.index = vertexIndex;
         }
     }
 
